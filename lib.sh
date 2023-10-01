@@ -1,6 +1,8 @@
 #!/bin/bash
 
 UTIL_DIR=$(dirname $(realpath $BASH_SOURCE))
+PROJECT_DIR=$UTIL_DIR/..
+
 
 COLOR_CYAN="\e[36m"
 COLOR_RED="\e[31m"
@@ -55,15 +57,19 @@ function CreateLogReportFile()
 
 function UpdateLogReport()
 {
-	local ret=$?
+    local fmt="$1"
+    local msg="$2"
+    printf "$fmt" "$msg" >> $LOG_FILE
 
-	if [ $ret -eq 0 ]; then
-		printf "%-50s  SUCCESS\n" "[$case_name]" >> $LOG_FILE
-	else
-		printf "%-50s  FAILED  [%s]\n" "[$case_name]" "$(ErrCode2Str $ret)" >> $LOG_FILE
-	fi
+    #local ret=$?
 
-	printf "\n"
+	#if [ $ret -eq 0 ]; then
+	#	printf "%-50s  SUCCESS\n" "[$case_name]" >> $LOG_FILE
+	#else
+	#	printf "%-50s  FAILED  [%s]\n" "[$case_name]" "$(ErrCode2Str $ret)" >> $LOG_FILE
+	#fi
+
+	#printf "\n"
 }
 
 function SummarizeLogReport()
