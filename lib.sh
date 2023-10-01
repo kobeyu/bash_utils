@@ -61,15 +61,6 @@ function UpdateLogReport()
     local msg="$2"
     printf "$fmt" "$msg" >> $LOG_FILE
 
-    #local ret=$?
-
-	#if [ $ret -eq 0 ]; then
-	#	printf "%-50s  SUCCESS\n" "[$case_name]" >> $LOG_FILE
-	#else
-	#	printf "%-50s  FAILED  [%s]\n" "[$case_name]" "$(ErrCode2Str $ret)" >> $LOG_FILE
-	#fi
-
-	#printf "\n"
 }
 
 function SummarizeLogReport()
@@ -84,17 +75,16 @@ function SummarizeLogReport()
 	sort $LOG_FILE > $tmp
 	mv $tmp $LOG_FILE
 
-	local success_cnt=$(grep "SUCCESS" $LOG_FILE | wc -l)
-	local fail_cnt=$(grep "FAILED" $LOG_FILE | wc -l)
+	local compile_cnt=$(grep "Compile SUCCESS" $LOG_FILE | wc -l)
+	local gem5_cnt=$(grep "Gem5 SUCCESS" $LOG_FILE | wc -l)
+	local spike_cnt=$(grep "Spike SUCCESS" $LOG_FILE | wc -l)
 
-	echo "================================================" >> $LOG_FILE
-	echo -e "=> [$success_cnt] cases generated, [$fail_cnt] cases failed" >> $LOG_FILE
-
-	if [ $fail_cnt -eq 0 ]; then
-		return 0
-	else
-		return -1
-	fi
+	echo "=======================================================================" >> $LOG_FILE
+	echo -e "=> [$compile_cnt] cases compiled" >> $LOG_FILE
+	echo -e "=> [$gem5_cnt] cases verified on gem5" >> $LOG_FILE
+	if [ $spike_cnt -ne 0 ]; then
+	    echo -e "=> [$spike_cnt] cases verified on Spike" >> $LOG_FILE
+    fi
 }
 
 function ShowLogReport()
