@@ -53,7 +53,6 @@ function BuildRISCVGNUToolchain() {
 
     if [ $build_mode == 'clean' ] || [ ! -f $RISCV_GNU_DIR/Makefile ]; then
         # TODO: Check how to clean build
-        make clean
         rm -rf $RISCV_GNU_DIR/Makefile
         rm -rf $RISCV_GNU_DIR/build*
 
