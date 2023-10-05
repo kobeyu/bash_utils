@@ -2,7 +2,7 @@
 
 UTIL_DIR=$(dirname $(realpath $BASH_SOURCE))
 PROJECT_DIR=$UTIL_DIR/..
-
+TRDPARTY_DIR=$PROJECT_DIR/3rdparty
 
 COLOR_CYAN="\e[36m"
 COLOR_RED="\e[31m"
@@ -13,33 +13,28 @@ COLOR_DEF="\e[39m"
 ERR_UNKNOWN=1
 ERR_SIM_FAIL=2
 
-
 ###################
 ##    logging    ##
 ###################
 
-function ColorEcho()
-{
+function ColorEcho() {
 	local msg="$1"
 	local color="$2"
 
 	echo -e "${color}$msg${COLOR_DEF}"
 }
 
-function LogError()
-{
+function LogError() {
 	local msg="$1"
 	ColorEcho "$msg" $COLOR_RED
 }
 
-function LogNotice()
-{
+function LogNotice() {
 	local msg="$1"
 	ColorEcho "$msg" $COLOR_YELLOW
 }
 
-function LogInfo()
-{
+function LogInfo() {
 	local msg="$1"
 	ColorEcho "$msg" $COLOR_CYAN
 }
@@ -48,23 +43,20 @@ function LogInfo()
 ##    log report    ##
 ######################
 
-function CreateLogReportFile()
-{
+function CreateLogReportFile() {
 	local path=$1
 	export LOG_FILE=$1
-	> $LOG_FILE
+	>$LOG_FILE
 }
 
-function UpdateLogReport()
-{
-    local fmt="$1"
-    local msg="$2"
-    printf "$fmt" "$msg" >> $LOG_FILE
+function UpdateLogReport() {
+	local fmt="$1"
+	local msg="$2"
+	printf "$fmt" "$msg" >>$LOG_FILE
 
 }
 
-function SummarizeLogReport()
-{
+function SummarizeLogReport() {
 	if [ -z "$LOG_FILE" ]; then
 		LogError "\$LOG_FILE not set"
 		return -1
@@ -72,23 +64,22 @@ function SummarizeLogReport()
 
 	local tmp=$(mktemp)
 
-	sort $LOG_FILE > $tmp
+	sort $LOG_FILE >$tmp
 	mv $tmp $LOG_FILE
 
 	local compile_cnt=$(grep "Compile SUCCESS" $LOG_FILE | wc -l)
 	local gem5_cnt=$(grep "Gem5 SUCCESS" $LOG_FILE | wc -l)
 	local spike_cnt=$(grep "Spike SUCCESS" $LOG_FILE | wc -l)
 
-	echo "=======================================================================" >> $LOG_FILE
-	echo -e "=> [$compile_cnt] cases compiled" >> $LOG_FILE
-	echo -e "=> [$gem5_cnt] cases verified on gem5" >> $LOG_FILE
+	echo "=======================================================================" >>$LOG_FILE
+	echo -e "=> [$compile_cnt] cases compiled" >>$LOG_FILE
+	echo -e "=> [$gem5_cnt] cases verified on gem5" >>$LOG_FILE
 	if [ $spike_cnt -ne 0 ]; then
-	    echo -e "=> [$spike_cnt] cases verified on Spike" >> $LOG_FILE
-    fi
+		echo -e "=> [$spike_cnt] cases verified on Spike" >>$LOG_FILE
+	fi
 }
 
-function ShowLogReport()
-{
+function ShowLogReport() {
 	cat $LOG_FILE
 }
 
@@ -100,8 +91,8 @@ function ErrCode2Str() {
 	local code=$1
 
 	case $code in
-		$ERR_SIM_FAIL) echo "simulation error" ;;
-		*) echo "unknown" ;;
+	$ERR_SIM_FAIL) echo "simulation error" ;;
+	*) echo "unknown" ;;
 	esac
 }
 
@@ -118,7 +109,7 @@ function CreateLinks() {
 }
 
 function CopyOrMoveFiles() {
-    local cmd=$1
+	local cmd=$1
 	local srcs=$2
 	local src_base_dir=${3:-""}
 	local dst_dir=${4:-"."}
@@ -126,29 +117,29 @@ function CopyOrMoveFiles() {
 	for src in $srcs; do
 		[ -n "$src_base_dir" ] && src=$src_base_dir/$src
 		if [ -f $src ] || [ -L $src ] || [ -d $src ]; then
-            if [ $cmd == "copy" ]; then
-			    cp -Hrf $(realpath $src) $dst_dir
-            else
-                mv -f $(realpath $src) $dst_dir
-            fi
+			if [ $cmd == "copy" ]; then
+				cp -Hrf $(realpath $src) $dst_dir
+			else
+				mv -f $(realpath $src) $dst_dir
+			fi
 		fi
 	done
 }
 
 function CopyFiles() {
-    local srcs=$1
+	local srcs=$1
 	local src_base_dir=${2:-""}
 	local dst_dir=${3:-"."}
 
-    CopyOrMoveFiles "copy" "$srcs" "$src_base_dir" "$dst_dir"
+	CopyOrMoveFiles "copy" "$srcs" "$src_base_dir" "$dst_dir"
 }
 
 function MoveFiles() {
-    local srcs=$1
+	local srcs=$1
 	local src_base_dir=${2:-""}
 	local dst_dir=${3:-"."}
 
-    CopyOrMoveFiles "move" "$srcs" "$src_base_dir" "$dst_dir"
+	CopyOrMoveFiles "move" "$srcs" "$src_base_dir" "$dst_dir"
 }
 
 function CheckSts() {
@@ -181,5 +172,3 @@ function CheckDirExist() {
 		exit 1
 	fi
 }
-
-
