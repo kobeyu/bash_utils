@@ -180,6 +180,14 @@ function BuildHalide() {
 
     CheckFile $build_dir/src/libHalide.so
 }
+
+function BuildRISCVOpcodes()
+{
+    CheckDir $RISCV_OPCODE_DIR
+    cd $RISCV_OPCODE_DIR
+    make
+    CheckFile $RISCV_OPCODE_DIR/instr_dict.yaml
+}
 ############
 ### MAIN ###
 ############
