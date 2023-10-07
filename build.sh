@@ -188,6 +188,26 @@ function BuildRISCVOpcodes()
     make
     CheckFile $RISCV_OPCODE_DIR/instr_dict.yaml
 }
+
+function BuildGem5()
+{
+    CheckDir $GEM5_DIR
+    local build_dir=$GEM5_DIR/build
+
+    if [ $mode == 'clean' ] || [ ! -d $build_dir ];then
+        echo "Clean build GEM5"
+        rm -rf $build_dir
+    fi
+
+    cd $GEM5_DIR
+    scons build/RISCV/gem5.opt -j 16
+    cd - > /dev/null
+    CheckFile $build_dir/RISCV/gem5.opt
+}
+
+
+
+
 ############
 ### MAIN ###
 ############
