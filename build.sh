@@ -119,7 +119,7 @@ function BuildPK() {
 }
 
 function CreateLongRISCVLLVMBuildDir {
-    build_dir=$1
+    local build_dir=$1
     mkdir $build_dir
     cd $build_dir
     cmake -DLLVM_TARGETS_TO_BUILD="X86;Hexagon" \
@@ -200,11 +200,119 @@ function BuildGem5()
     fi
 
     cd $GEM5_DIR
-    scons build/RISCV/gem5.opt -j 16
+    scons build/RISCV/gem5.opt -j $build_cores
     cd - > /dev/null
     CheckFile $build_dir/RISCV/gem5.opt
 }
 
+
+function CreateTVMDLRBuildDir() {
+    local build_dir=$1
+
+    mkdir -p $build_dir
+    cd $build_dir
+
+    cmake .. -DCMAKE_INSTALL_PREFIX=$TVMDLR_DIR/install -DCMAKE_BUILD_TYPE=Debug
+
+    cd - > /dev/null
+}
+
+
+function BuildTVMDlr()
+{
+    CheckDir $TVMDLR_DIR
+
+    local build_dir=$TVMDLR_DIR/build
+
+    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+        echo "Clean build TVM DLR"
+        rm -rf $build_dir
+        CreateTVMDLRBuildDir $build_dir
+    fi
+
+    cd $build_dir
+    make -j $build_cores
+    make install
+}
+
+
+function CreateLLVMBuildDir()
+{
+    local build_dir=$1
+    mkdir -p $build_dir
+
+    cd $build_dir
+
+    #-DLLVM_TARGETS_TO_BUILD="X86;RISCV;ARM;NVPTX;AArch64;Hexagon" \
+    #-DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra;mlir" \
+    cmake -G Ninja ../llvm \
+    	-DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
+    	-DCMAKE_BUILD_TYPE=Debug \
+        -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
+        -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_BUILD_32_BITS=OFF \
+    	-DLLVM_USE_LINKER=gold
+
+    cd - > /dev/null
+}
+
+function BuildLLVM()
+{
+    CheckDir $LLVM_DIR
+    local build_dir=$LLVM_DIR/build
+
+    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+        rm -rf $build_dir
+        LogNotice "Clean build LLVM"
+        CreateLLVMBuildDir $build_dir
+    fi
+
+    cd $build_dir
+    ninja  -j16
+}
+
+
+function CreateTVMBuildDir()
+{
+    local build_dir=$1
+    local config_template=$TVM_DIR/cmake/config.cmake
+    local build_config=$build_dir/config.cmake
+
+    mkdir -p $build_dir; cd $build_dir
+
+    CheckDir $LLVM_DIR
+    llvm_config=$LLVM_DIR/build/bin/llvm-config
+
+    if [ ! -f $llvm_config ];then
+        LogError "There is no llvm-config in LLVM/build"
+        exit 1
+    fi
+
+    cp $config_template $build_config
+
+    string_to_replace="set(USE_LLVM OFF)"
+    replacement_string="set(USE_LLVM $llvm_config)"
+
+    sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
+
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+    cd - >/dev/null
+}
+
+function BuildTVM()
+{
+    CheckDir $TVM_DIR
+
+    local build_dir=$TVM_DIR/build
+
+    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+        LogNotice "Clean build TVM"
+        rm -rf $build_dir
+        CreateTVMBuildDir $build_dir
+    fi
+
+    cd $build_dir
+    make -j16
+}
 
 
 
