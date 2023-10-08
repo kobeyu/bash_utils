@@ -222,6 +222,21 @@ function BuildTVMDlr()
 {
     CheckDir $TVMDLR_DIR
 
+    if [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
+        echo "$RISCV/bin/riscv64-unknown-elf-gcc"
+        LogError "riscv-unknow-elf-gcc doest not exist!"
+        exit
+    fi
+
+    if [ ! -f "$RISCV/bin/riscv64-unknown-elf-g++" ]; then
+        LogError "riscv-unknwn-elfg++ doest not exist!"
+        exit
+    fi
+
+    export CC=$RISCV/bin/riscv64-unknown-elf-gcc
+    export CXX=$RISCV/bin/riscv64-unknown-elf-g++
+
+
     local build_dir=$TVMDLR_DIR/build
 
     if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
