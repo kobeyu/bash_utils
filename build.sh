@@ -94,7 +94,11 @@ function CreatePKBuildDir() {
     local build_dir=$1
     mkdir -p $build_dir
     cd $build_dir
-    $PK_DIR/configure --prefix=$RISCV --host=riscv64-unknown-elf
+
+    CheckDir $RISCV
+
+    #ref: https://github.com/riscv-software-src/riscv-pk/issues/298
+    $PK_DIR/configure --prefix=$RISCV --host=riscv64-unknown-elf --with-arch=rv64gc_zifencei
     cd - >/dev/null
 
 }
@@ -233,6 +237,8 @@ function BuildTVMDlr()
         exit
     fi
 
+    ORI_CC=$CC
+    ORI_CXX=$CXX
     export CC=$RISCV/bin/riscv64-unknown-elf-gcc
     export CXX=$RISCV/bin/riscv64-unknown-elf-g++
 
@@ -248,6 +254,9 @@ function BuildTVMDlr()
     cd $build_dir
     make -j $build_cores
     make install
+
+    export CC=$ORI_CC
+    export CXX=$ORI_CXX
 }
 
 
