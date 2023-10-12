@@ -34,7 +34,7 @@ function BuildGem5() {
     CheckDir $GEM5_DIR
 
     local build_dir=$GEM5_DIR/build
-    if [ $build_mode == 'clean' ] || [ ! -d $build_dir ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         LogNotice "Clean build GEM5"
         rm -rf $build_dir
     fi
@@ -51,7 +51,7 @@ function BuildRISCVGNUToolchain() {
 
     cd $RISCV_GNU_DIR
 
-    if [ $build_mode == 'clean' ] || [ ! -f $RISCV_GNU_DIR/Makefile ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -f $RISCV_GNU_DIR/Makefile ]; then
         # TODO: Check how to clean build
         rm -rf $RISCV_GNU_DIR/Makefile
         rm -rf $RISCV_GNU_DIR/build*
@@ -78,7 +78,7 @@ function BuildSpike() {
 
     local build_dir=$SPIKE_DIR/build
 
-    if [ $build_mode == 'clean' ] || [ ! -d $build_dir ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         rm -rf $build_dir
         CreateSpikeBuildDir $build_dir
     fi
@@ -110,7 +110,7 @@ function BuildPK() {
 
     local build_dir=$PK_DIR/build
 
-    if [ $build_mode == 'clean' ] || [ ! -d $build_dir ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         rm -rf $build_dir
         CreatePKBuildDir $build_dir
     fi
@@ -142,7 +142,7 @@ function BuildLongRISCVLLVM {
 
     local build_dir=$LONGRISCV_LLVM_DIR/build
 
-    if [ $build_mode == 'clean' ] || [ ! -d $build_dir ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         rm -rf $build_dir
         CreateLongRISCVLLVMBuildDir $build_dir
     fi
@@ -172,7 +172,7 @@ function BuildHalide() {
 
     local build_dir=$HALIDE_DIR/build
 
-    if [ $build_mode == 'clean' ] || [ ! -d $build_dir ]; then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         rm -rf $build_dir
         CreateHalideBuildDir $build_dir
     fi
@@ -198,7 +198,7 @@ function BuildGem5()
     CheckDir $GEM5_DIR
     local build_dir=$GEM5_DIR/build
 
-    if [ $mode == 'clean' ] || [ ! -d $build_dir ];then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
         echo "Clean build GEM5"
         rm -rf $build_dir
     fi
@@ -224,28 +224,32 @@ function CreateTVMDLRBuildDir() {
 
 function BuildTVMDlr()
 {
+    target=${1:-riscv}
     CheckDir $TVMDLR_DIR
 
-    if [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
+
+    if [ "$target" == "riscv"] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
         echo "$RISCV/bin/riscv64-unknown-elf-gcc"
         LogError "riscv-unknow-elf-gcc doest not exist!"
         exit
     fi
 
-    if [ ! -f "$RISCV/bin/riscv64-unknown-elf-g++" ]; then
+    if [ "$target" == "riscv"] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-g++" ]; then
         LogError "riscv-unknwn-elfg++ doest not exist!"
         exit
     fi
 
-    ORI_CC=$CC
-    ORI_CXX=$CXX
-    export CC=$RISCV/bin/riscv64-unknown-elf-gcc
-    export CXX=$RISCV/bin/riscv64-unknown-elf-g++
+    if [ "$target" == "riscv" ];then
+        ORI_CC=$CC
+        ORI_CXX=$CXX
+        export CC=$RISCV/bin/riscv64-unknown-elf-gcc
+        export CXX=$RISCV/bin/riscv64-unknown-elf-g++
+    fi
 
 
     local build_dir=$TVMDLR_DIR/build
 
-    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
         echo "Clean build TVM DLR"
         rm -rf $build_dir
         CreateTVMDLRBuildDir $build_dir
@@ -255,8 +259,10 @@ function BuildTVMDlr()
     make -j $build_cores
     make install
 
-    export CC=$ORI_CC
-    export CXX=$ORI_CXX
+    if [ "$target" == "riscv" ];then
+        export CC=$ORI_CC
+        export CXX=$ORI_CXX
+    fi
 }
 
 
@@ -284,7 +290,7 @@ function BuildLLVM()
     CheckDir $LLVM_DIR
     local build_dir=$LLVM_DIR/build
 
-    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
         rm -rf $build_dir
         LogNotice "Clean build LLVM"
         CreateLLVMBuildDir $build_dir
@@ -328,7 +334,7 @@ function BuildTVM()
 
     local build_dir=$TVM_DIR/build
 
-    if [ "$mode" == 'clean' ] || [ ! -d $build_dir ];then
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
         LogNotice "Clean build TVM"
         rm -rf $build_dir
         CreateTVMBuildDir $build_dir
