@@ -278,6 +278,7 @@ function CreateLLVMBuildDir()
     cmake -G Ninja ../llvm \
     	-DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
     	-DCMAKE_BUILD_TYPE=Debug \
+        -DLLVM_ENABLE_PROJECTS="clang" \
         -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
         -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_BUILD_32_BITS=OFF \
     	-DLLVM_USE_LINKER=gold
@@ -297,7 +298,7 @@ function BuildLLVM()
     fi
 
     cd $build_dir
-    ninja  -j16
+    ninja  -j$build_cores
 }
 
 
@@ -341,10 +342,37 @@ function BuildTVM()
     fi
 
     cd $build_dir
-    make -j16
+    make -j$build_cores
 }
 
+function CreateHalideBuildDir() {
+    local build_dir=$1
 
+    CheckDir $LLVM_DIR
+    local llvm_build_lib_dir=$LLVM_DIR/build/lib/cmake/llvm
+    CheckDir $llvm_build_lib_dir
+
+    cd $HALIDE_DIR
+    cmake -G Ninja -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$llvm_build_lib_dir -S . -B $build_dir
+    cd - > /dev/null
+}
+
+function BuildHalide()
+{
+    CheckDir $HALIDE_DIR
+
+    local build_dir=$HALIDE_DIR/build
+
+    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
+        LogNotice "Clean build Halide"
+        rm -rf $build_dir
+        CreateHalideBuildDir $build_dir
+    fi
+
+    cd $build_dir
+    ninja install
+
+}
 
 ############
 ### MAIN ###
