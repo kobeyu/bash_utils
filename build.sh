@@ -126,8 +126,7 @@ function CreateLongRISCVLLVMBuildDir {
     local build_dir=$1
     mkdir $build_dir
     cd $build_dir
-    cmake -DLLVM_TARGETS_TO_BUILD="X86;Hexagon" \
-        -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="LongRISCV" \
+    cmake -DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
         -DLLVM_ENABLE_PROJECTS="clang;lld" \
         -DCMAKE_BUILD_TYPE=Debug \
         -DLLVM_ENABLE_ASSERTIONS=ON \
