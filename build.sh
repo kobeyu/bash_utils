@@ -30,21 +30,6 @@ function CheckFile() {
     fi
 }
 
-function BuildGem5() {
-    CheckDir $GEM5_DIR
-
-    local build_dir=$GEM5_DIR/build
-    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
-        LogNotice "Clean build GEM5"
-        rm -rf $build_dir
-    fi
-
-    cd $GEM5_DIR
-    scons build/RISCV/gem5.opt -j $build_cores
-    cd - >/dev/null
-
-    CheckFile $build_dir/RISCV/gem5.opt
-}
 
 function BuildRISCVGNUToolchain() {
     CheckDir $RISCV_GNU_DIR
@@ -126,8 +111,7 @@ function CreateLongRISCVLLVMBuildDir {
     local build_dir=$1
     mkdir $build_dir
     cd $build_dir
-    cmake -DLLVM_TARGETS_TO_BUILD="X86;Hexagon" \
-        -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="LongRISCV" \
+    cmake -DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
         -DLLVM_ENABLE_PROJECTS="clang;lld" \
         -DCMAKE_BUILD_TYPE=Debug \
         -DLLVM_ENABLE_ASSERTIONS=ON \
@@ -153,37 +137,7 @@ function BuildLongRISCVLLVM {
     CheckFile $build_dir/bin/llvm-config
 }
 
-function CreateHalideBuildDir() {
-    cd $HALIDE_DIR
 
-    if [ ! -d $RISCV_LLVM_DIR ]; then
-        echo "riscv llvm dir does not exist! $RISCV_LLVM_DIR"
-        exit 1
-    fi
-
-    llvm_build_lib=$RISCV_LLVM_DIR/build/lib/cmake/llvm
-    cmake -G Ninja -DCMAKE_INSTALL_PREFIX=install \
-        -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$llvm_build_lib \
-        -S . -B build
-}
-
-function BuildHalide() {
-    CheckDir $HALIDE_DIR
-
-    local build_dir=$HALIDE_DIR/build
-
-    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
-        rm -rf $build_dir
-        CreateHalideBuildDir $build_dir
-    fi
-
-    cd $build_dir
-
-    ninja
-    ninja install
-
-    CheckFile $build_dir/src/libHalide.so
-}
 
 function BuildRISCVOpcodes()
 {
@@ -193,11 +147,10 @@ function BuildRISCVOpcodes()
     CheckFile $RISCV_OPCODE_DIR/instr_dict.yaml
 }
 
-function BuildGem5()
-{
+function BuildGem5() {
     CheckDir $GEM5_DIR
-    local build_dir=$GEM5_DIR/build
 
+    local build_dir=$GEM5_DIR/build
     if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
         echo "Clean build GEM5"
         rm -rf $build_dir
@@ -353,7 +306,10 @@ function CreateHalideBuildDir() {
     CheckDir $llvm_build_lib_dir
 
     cd $HALIDE_DIR
-    cmake -G Ninja -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$llvm_build_lib_dir -S . -B $build_dir
+    cmake -G Ninja -DCMAKE_INSTALL_PREFIX=install \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DLLVM_DIR=$llvm_build_lib_dir \
+        -S . -B $build_dir
     cd - > /dev/null
 }
 
@@ -372,6 +328,7 @@ function BuildHalide()
     cd $build_dir
     ninja install
 
+    CheckFile $build_dir/src/libHalide.so
 }
 
 ############
