@@ -182,20 +182,18 @@ function BuildTVMDlr()
     CheckDir $TVMDLR_DIR
 
 
-    if [ "$target" == "riscv"] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
+    if [ "$target" == "riscv" ] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
         echo "$RISCV/bin/riscv64-unknown-elf-gcc"
         LogError "riscv-unknow-elf-gcc doest not exist!"
         exit
     fi
 
-    if [ "$target" == "riscv"] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-g++" ]; then
+    if [ "$target" == "riscv" ] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-g++" ]; then
         LogError "riscv-unknwn-elfg++ doest not exist!"
         exit
     fi
 
     if [ "$target" == "riscv" ];then
-        ORI_CC=$CC
-        ORI_CXX=$CXX
         export CC=$RISCV/bin/riscv64-unknown-elf-gcc
         export CXX=$RISCV/bin/riscv64-unknown-elf-g++
     fi
@@ -214,8 +212,8 @@ function BuildTVMDlr()
     make install
 
     if [ "$target" == "riscv" ];then
-        export CC=$ORI_CC
-        export CXX=$ORI_CXX
+        export CC=$(which gcc)
+        export CXX=$(which g++)
     fi
 }
 
