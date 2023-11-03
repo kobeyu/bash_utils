@@ -230,9 +230,10 @@ function CreateLLVMBuildDir()
     cmake -G Ninja ../llvm \
     	-DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
     	-DCMAKE_BUILD_TYPE=Debug \
-        -DLLVM_ENABLE_PROJECTS="clang" \
+        -DLLVM_ENABLE_PROJECTS="clang;lld" \
         -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
         -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_BUILD_32_BITS=OFF \
+        -DLLVM_ENABLE_RUNTIMES="compiler-rt" \
     	-DLLVM_USE_LINKER=gold
 
     cd - > /dev/null
