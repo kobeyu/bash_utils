@@ -181,7 +181,6 @@ function BuildTVMDlr()
     target=${1:-riscv}
     CheckDir $TVMDLR_DIR
 
-
     if [ "$target" == "riscv" ] && [ ! -f "$RISCV/bin/riscv64-unknown-elf-gcc" ]; then
         echo "$RISCV/bin/riscv64-unknown-elf-gcc"
         LogError "riscv-unknow-elf-gcc doest not exist!"
@@ -196,8 +195,11 @@ function BuildTVMDlr()
     if [ "$target" == "riscv" ];then
         export CC=$RISCV/bin/riscv64-unknown-elf-gcc
         export CXX=$RISCV/bin/riscv64-unknown-elf-g++
-    fi
+    else
+        export CC=$(which gcc)
+        export CXX=$(which g++)
 
+    fi
 
     local build_dir=$TVMDLR_DIR/build
 
@@ -215,6 +217,8 @@ function BuildTVMDlr()
         export CC=$(which gcc)
         export CXX=$(which g++)
     fi
+
+    cd - > /dev/null
 }
 
 
