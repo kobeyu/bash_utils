@@ -278,11 +278,16 @@ function CreateTVMBuildDir()
     cp $config_template $build_config
 
     string_to_replace="set(USE_LLVM OFF)"
-    replacement_string="set(USE_LLVM $llvm_config)"
-
+    replacement_string="set(USE_LLVM \"$llvm_config --ignore-libllvm --link-static\")"
     sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
 
-    cmake .. -DCMAKE_BUILD_TYPE=Debug
+    #string_to_replace="set(USE_CUDA OFF)"
+    #replacement_string="set(USE_CUDA ON)"
+    #sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
+
+    echo "set(HIDE_PRIVATE_SYMBOLS ON)" >>  $build_config
+
+    cmake .. -DCMAKE_BUILD_TYPE="RelWithDebInfo"
     cd - >/dev/null
 }
 
