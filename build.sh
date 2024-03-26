@@ -232,12 +232,12 @@ function CreateLLVMBuildDir()
     #-DLLVM_TARGETS_TO_BUILD="X86;RISCV;ARM;NVPTX;AArch64;Hexagon" \
     #-DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra;mlir" \
     cmake -G Ninja ../llvm \
-    	-DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
-    	-DCMAKE_BUILD_TYPE=Debug \
-        -DLLVM_ENABLE_PROJECTS="clang;lld" \
-        -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
-        -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_BUILD_32_BITS=OFF \
-        -DLLVM_ENABLE_RUNTIMES="compiler-rt" \
+        -DLLVM_TARGETS_TO_BUILD="X86;Hexagon;AArch64;ARM" \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DLLVM_PARALLEL_LINK_JOBS=1 \
+        -Wl,-no-keep-memory \
+        -Wl,--reduce-memory-overheads \
+        -DBUILD_SHARED_LIBS=ON \
     	-DLLVM_USE_LINKER=gold
 
     cd - > /dev/null
@@ -281,9 +281,9 @@ function CreateTVMBuildDir()
     replacement_string="set(USE_LLVM \"$llvm_config --ignore-libllvm --link-static\")"
     sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
 
-    #string_to_replace="set(USE_CUDA OFF)"
-    #replacement_string="set(USE_CUDA ON)"
-    #sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
+    string_to_replace="set(USE_CUDA OFF)"
+    replacement_string="set(USE_CUDA ON)"
+    sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
 
     echo "set(HIDE_PRIVATE_SYMBOLS ON)" >>  $build_config
 
