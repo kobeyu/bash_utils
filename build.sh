@@ -278,7 +278,7 @@ function CreateTVMBuildDir()
     cp $config_template $build_config
 
     string_to_replace="set(USE_LLVM OFF)"
-    replacement_string="set(USE_LLVM \"$llvm_config --ignore-libllvm --link-static\")"
+    replacement_string="set(USE_LLVM \"$llvm_config --ignore-libllvm \")"
     sed -i "s|$string_to_replace|$replacement_string|g" "$build_config"
 
     string_to_replace="set(USE_CUDA OFF)"
