@@ -233,7 +233,8 @@ function CreateLLVMBuildDir()
     #-DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra;mlir" \
     cmake -G Ninja ../llvm \
         -DLLVM_TARGETS_TO_BUILD="X86;Hexagon;AArch64;ARM" \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DLLVM_ENABLE_PROJECTS="clang" \
+        -DCMAKE_BUILD_TYPE=Debug \
         -DLLVM_PARALLEL_LINK_JOBS=1 \
         -Wl,-no-keep-memory \
         -Wl,--reduce-memory-overheads \
