@@ -107,14 +107,17 @@ function BuildPK() {
     CheckFile $build_dir/pk
 }
 
-function CreateLongRISCVLLVMBuildDir {
+function CreateLLVMBuildDir {
     local build_dir=$1
     mkdir $build_dir
     cd $build_dir
-    cmake -DLLVM_TARGETS_TO_BUILD="X86;Hexagon" \
-        -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="LongRISCV" \
+    cmake -DLLVM_TARGETS_TO_BUILD="X86;RISCV" \
         -DLLVM_ENABLE_PROJECTS="clang;lld" \
+        -DLLVM_PARALLEL_LINK_JOBS=1 \
         -DCMAKE_BUILD_TYPE=Debug \
+        -Wl,-no-keep-memory \
+        -Wl,--reduce-memory-overheads \
+        -DBUILD_SHARED_LIBS=ON \
         -DLLVM_ENABLE_ASSERTIONS=ON \
         -DLLVM_ENABLE_RTTI=ON \
         -DLLVM_USE_LINKER=gold \
@@ -122,14 +125,14 @@ function CreateLongRISCVLLVMBuildDir {
     cd - >/dev/null
 }
 
-function BuildLongRISCVLLVM {
-    CheckDir $LONGRISCV_LLVM_DIR
+function BuildLLVM {
+    CheckDir $LLVM_DIR
 
-    local build_dir=$LONGRISCV_LLVM_DIR/build
+    local build_dir=$LLVM_DIR/build
 
     if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ]; then
         rm -rf $build_dir
-        CreateLongRISCVLLVMBuildDir $build_dir
+        CreateLLVMBuildDir $build_dir
     fi
 
     cd $build_dir
@@ -219,44 +222,6 @@ function BuildTVMDlr()
     fi
 
     cd - > /dev/null
-}
-
-
-function CreateLLVMBuildDir()
-{
-    local build_dir=$1
-    mkdir -p $build_dir
-
-    cd $build_dir
-
-    #-DLLVM_TARGETS_TO_BUILD="X86;RISCV;ARM;NVPTX;AArch64;Hexagon" \
-    #-DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra;mlir" \
-    cmake -G Ninja ../llvm \
-        -DLLVM_TARGETS_TO_BUILD="X86;Hexagon;AArch64;ARM" \
-        -DLLVM_ENABLE_PROJECTS="clang" \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DLLVM_PARALLEL_LINK_JOBS=1 \
-        -Wl,-no-keep-memory \
-        -Wl,--reduce-memory-overheads \
-        -DBUILD_SHARED_LIBS=ON \
-    	-DLLVM_USE_LINKER=gold
-
-    cd - > /dev/null
-}
-
-function BuildLLVM()
-{
-    CheckDir $LLVM_DIR
-    local build_dir=$LLVM_DIR/build
-
-    if [ "$build_mode" == 'clean' ] || [ ! -d $build_dir ];then
-        rm -rf $build_dir
-        LogNotice "Clean build LLVM"
-        CreateLLVMBuildDir $build_dir
-    fi
-
-    cd $build_dir
-    ninja  -j$build_cores
 }
 
 
